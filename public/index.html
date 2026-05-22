@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+		/>
+		<meta
+			name="description"
+			content="Invisi Proxy, a polished Scramjet-powered web proxy."
+		/>
+		<title>Invisi Proxy</title>
+
+		<link rel="shortcut icon" href="favicon.ico" />
+		<script src="/scram/scramjet.all.js"></script>
+		<script src="/baremux/index.js"></script>
+
+		<link rel="stylesheet" href="index.css" />
+		<script src="register-sw.js" defer></script>
+		<script src="search.js" defer></script>
+		<script src="index.js" defer></script>
+	</head>
+
+	<body>
+		<main class="app-shell" aria-label="Invisi Proxy">
+			<section class="launch-panel" id="launch-panel" aria-label="Proxy launch">
+				<header class="brand-bar">
+					<a class="brand" href="/" aria-label="Invisi Proxy home">
+						<span class="brand-mark" aria-hidden="true">
+							<img src="sj.png" alt="" />
+						</span>
+						<span>
+							<strong>Invisi Proxy</strong>
+							<small>Scramjet powered</small>
+						</span>
+					</a>
+
+					<nav class="utility-links" aria-label="Resources">
+						<a href="credits.html">Credits</a>
+						<a href="https://github.com/MercuryWorkshop/scramjet">Scramjet</a>
+					</nav>
+				</header>
+
+				<div class="launch-layout">
+					<section class="search-stage" aria-labelledby="search-title">
+						<p class="eyebrow">Private browsing workspace</p>
+						<h1 id="search-title">Invisi Proxy</h1>
+
+						<form id="sj-form" class="omnibox-card">
+							<input
+								id="sj-search-engine"
+								value="https://www.google.com/search?q=%s"
+								type="hidden"
+							/>
+							<label class="visually-hidden" for="sj-address">
+								Search or enter a URL
+							</label>
+							<div class="omnibox">
+								<svg
+									viewBox="0 0 24 24"
+									aria-hidden="true"
+									class="input-icon"
+									fill="none"
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+								>
+									<circle cx="11" cy="11" r="8"></circle>
+									<path d="m21 21-4.35-4.35"></path>
+								</svg>
+								<input
+									id="sj-address"
+									type="text"
+									autocomplete="off"
+									spellcheck="false"
+									placeholder="Search or enter a URL"
+								/>
+								<button id="sj-launch" class="launch-button" type="submit">
+									Go
+								</button>
+							</div>
+						</form>
+
+						<div class="quick-links" aria-label="Quick links">
+							<button type="button" data-url="https://google.com">
+								Google
+							</button>
+							<button type="button" data-url="https://youtube.com">
+								YouTube
+							</button>
+							<button type="button" data-url="https://reddit.com">
+								Reddit
+							</button>
+							<button type="button" data-url="https://discord.com">
+								Discord
+							</button>
+						</div>
+
+						<section
+							class="status-panel"
+							id="status-panel"
+							aria-live="polite"
+							aria-atomic="true"
+						>
+							<span
+								class="status-dot"
+								id="status-dot"
+								aria-hidden="true"
+							></span>
+							<p id="sj-status">Ready</p>
+						</section>
+
+						<div class="error-panel" id="sj-error-panel" hidden>
+							<p id="sj-error"></p>
+							<pre id="sj-error-code"></pre>
+						</div>
+					</section>
+
+					<aside class="system-panel" aria-label="Connection details">
+						<div>
+							<span>Transport</span>
+							<strong id="transport-status">Libcurl over Wisp</strong>
+						</div>
+						<div>
+							<span>Service worker</span>
+							<strong id="worker-status">Pending</strong>
+						</div>
+						<div>
+							<span>Search</span>
+							<select id="search-provider" aria-label="Search provider">
+								<option value="https://www.google.com/search?q=%s">
+									Google
+								</option>
+								<option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
+								<option value="https://www.bing.com/search?q=%s">Bing</option>
+							</select>
+						</div>
+					</aside>
+				</div>
+			</section>
+
+			<section
+				class="browser-shell"
+				id="browser-shell"
+				aria-label="Proxy browser"
+				hidden
+			>
+				<header class="browser-toolbar">
+					<div class="window-controls" aria-hidden="true">
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+
+					<div class="nav-controls" aria-label="Browser controls">
+						<button
+							class="icon-button"
+							id="back-button"
+							type="button"
+							title="Back"
+							aria-label="Back"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+							>
+								<path d="m15 18-6-6 6-6"></path>
+							</svg>
+						</button>
+						<button
+							class="icon-button"
+							id="forward-button"
+							type="button"
+							title="Forward"
+							aria-label="Forward"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+							>
+								<path d="m9 18 6-6-6-6"></path>
+							</svg>
+						</button>
+						<button
+							class="icon-button"
+							id="reload-button"
+							type="button"
+							title="Reload"
+							aria-label="Reload"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+							>
+								<path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+								<path d="M21 3v6h-6"></path>
+							</svg>
+						</button>
+						<button
+							class="icon-button"
+							id="home-button"
+							type="button"
+							title="Home"
+							aria-label="Home"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+								fill="none"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+							>
+								<path d="m3 11 9-8 9 8"></path>
+								<path d="M5 10v10h14V10"></path>
+								<path d="M9 20v-6h6v6"></path>
+							</svg>
+						</button>
+					</div>
+
+					<form id="browser-form" class="toolbar-form">
+						<label class="visually-hidden" for="browser-address">
+							Current address
+						</label>
+						<input
+							id="browser-address"
+							type="text"
+							autocomplete="off"
+							spellcheck="false"
+						/>
+					</form>
+
+					<button
+						class="icon-button"
+						id="detach-button"
+						type="button"
+						title="Open page in new tab"
+						aria-label="Open page in new tab"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+						>
+							<path d="M15 3h6v6"></path>
+							<path d="M10 14 21 3"></path>
+							<path d="M18 13v8H3V6h8"></path>
+						</svg>
+					</button>
+				</header>
+				<div class="frame-stage" id="frame-stage">
+					<div class="frame-loader" id="frame-loader">
+						<span></span>
+						<p>Connecting</p>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
