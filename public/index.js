@@ -1,5 +1,5 @@
 "use strict";
-/* global BareMux, $scramjetLoadController, registerSW, search */
+/* global BareMux, $scramjetLoadController, registerSW, search, __uv$config */
 
 const form = document.getElementById("sj-form");
 const browserForm = document.getElementById("browser-form");
@@ -7,6 +7,7 @@ const address = document.getElementById("sj-address");
 const browserAddress = document.getElementById("browser-address");
 const searchEngine = document.getElementById("sj-search-engine");
 const searchProvider = document.getElementById("search-provider");
+const proxyEngine = document.getElementById("proxy-engine");
 const launchButton = document.getElementById("sj-launch");
 const launchPanel = document.getElementById("launch-panel");
 const browserShell = document.getElementById("browser-shell");
@@ -42,6 +43,7 @@ const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
 let activeFrame = null;
 let activeUrl = "";
+let activeEngine = "";
 let launchInProgress = false;
 
 form.addEventListener("submit", (event) => {
@@ -90,7 +92,10 @@ detachButton.addEventListener("click", () => {
 address.focus();
 
 async function navigateFromInput(value) {
-	const nextUrl = search(value.trim(), searchEngine.value);
+	const cleanValue = value.trim();
+	if (!cleanValue) return;
+
+	const nextUrl = search(cleanValue, searchEngine.value);
 	await navigateTo(nextUrl);
 }
 
@@ -106,10 +111,10 @@ async function navigateTo(url) {
 	browserAddress.value = url;
 
 	try {
-		await ensureServiceWorker();
 		await ensureTransport();
+		await ensureServiceWorker();
 		openBrowserShell();
-		const frame = ensureFrame();
+		const frame = ensureFrame(getRuntimeEngine());
 		frame.go(url);
 		setStatus("Loading", "busy");
 	} catch (err) {
@@ -134,29 +139,66 @@ async function ensureTransport() {
 	}/wisp/`;
 
 	transportStatus.textContent = "Connecting";
-	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
-		await connection.setTransport("/libcurl/index.mjs", [
-			{ websocket: wispUrl },
-		]);
+	if ((await connection.getTransport()) !== "/epoxy/index.mjs") {
+		await connection.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
 	}
-	transportStatus.textContent = "Connected";
+	transportStatus.textContent = getTransportLabel();
 }
 
-function ensureFrame() {
-	if (activeFrame) return activeFrame;
+function ensureFrame(engine) {
+	if (activeFrame && activeEngine === engine) return activeFrame;
 
-	activeFrame = scramjet.createFrame();
-	activeFrame.frame.id = "sj-frame";
-	activeFrame.frame.title = "Invisi Proxy browser";
-	activeFrame.frame.addEventListener("load", () => {
-		hideFrameLoader();
-		setStatus("Connected", "ready");
-		const frameUrl = getFrameLocation();
-		if (frameUrl) browserAddress.value = activeUrl;
-	});
+	if (activeFrame) activeFrame.frame.remove();
+
+	activeEngine = engine;
+	activeFrame =
+		engine === "ultraviolet" ? createUltravioletFrame() : createScramjetFrame();
 	frameStage.appendChild(activeFrame.frame);
 
 	return activeFrame;
+}
+
+function createScramjetFrame() {
+	const frame = scramjet.createFrame();
+	frame.frame.id = "sj-frame";
+	frame.frame.title = "Invisi Proxy Scramjet browser";
+	frame.frame.addEventListener("load", handleFrameLoad);
+
+	return {
+		frame: frame.frame,
+		go: (url) => frame.go(url),
+	};
+}
+
+function createUltravioletFrame() {
+	const frame = document.createElement("iframe");
+	frame.id = "sj-frame";
+	frame.title = "Invisi Proxy Ultraviolet browser";
+	frame.addEventListener("load", handleFrameLoad);
+
+	return {
+		frame,
+		go: (url) => {
+			frame.src = `${__uv$config.prefix}${__uv$config.encodeUrl(url)}`;
+		},
+	};
+}
+
+function handleFrameLoad() {
+	hideFrameLoader();
+	setStatus("Connected", "ready");
+	const frameUrl = getFrameLocation();
+	if (frameUrl) browserAddress.value = activeUrl;
+}
+
+function getRuntimeEngine() {
+	return proxyEngine.value === "ultraviolet" ? "ultraviolet" : "scramjet";
+}
+
+function getTransportLabel() {
+	if (proxyEngine.value === "ultraviolet") return "Ultraviolet via Epoxy";
+	if (proxyEngine.value === "nebula") return "Nebula mode via Scramjet";
+	return "Scramjet via Epoxy";
 }
 
 function runFrameAction(action) {
@@ -188,13 +230,14 @@ function resetToHome() {
 	}
 
 	activeUrl = "";
+	activeEngine = "";
 	address.value = "";
 	browserAddress.value = "";
 	workerStatus.textContent =
 		navigator.serviceWorker && navigator.serviceWorker.controller
 			? "Ready"
 			: "Pending";
-	transportStatus.textContent = "Libcurl over Wisp";
+	transportStatus.textContent = "Epoxy over Wisp";
 	hideFrameLoader();
 	clearError();
 	setStatus("Ready", "ready");

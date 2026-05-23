@@ -14,6 +14,8 @@
 
 		<link rel="shortcut icon" href="favicon.ico" />
 		<script src="/scram/scramjet.all.js"></script>
+		<script src="/uv/uv.bundle.js"></script>
+		<script src="/uv-app.config.js"></script>
 		<script src="/baremux/index.js"></script>
 
 		<link rel="stylesheet" href="index.css" />
@@ -121,7 +123,15 @@
 					<aside class="system-panel" aria-label="Connection details">
 						<div>
 							<span>Transport</span>
-							<strong id="transport-status">Libcurl over Wisp</strong>
+							<strong id="transport-status">Epoxy over Wisp</strong>
+						</div>
+						<div>
+							<span>Proxy engine</span>
+							<select id="proxy-engine" aria-label="Proxy engine">
+								<option value="scramjet">Scramjet</option>
+								<option value="ultraviolet">Ultraviolet</option>
+								<option value="nebula">Nebula mode</option>
+							</select>
 						</div>
 						<div>
 							<span>Service worker</span>
