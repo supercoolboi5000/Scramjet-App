@@ -21,5 +21,21 @@ async function registerSW() {
 		throw new Error("Your browser doesn't support service workers.");
 	}
 
-	await navigator.serviceWorker.register(stockSW);
+	const registration = await navigator.serviceWorker.register(stockSW, {
+		updateViaCache: "none",
+	});
+
+	await registration.update();
+
+	if (registration.waiting) {
+		registration.waiting.postMessage({ type: "SKIP_WAITING" });
+	}
+
+	if (!navigator.serviceWorker.controller) {
+		await new Promise((resolve) => {
+			navigator.serviceWorker.addEventListener("controllerchange", resolve, {
+				once: true,
+			});
+		});
+	}
 }

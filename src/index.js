@@ -27,6 +27,18 @@ const fastify = Fastify({
 			.on("request", (req, res) => {
 				res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
 				res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+				if (
+					req.url.startsWith("/scram/") ||
+					req.url.startsWith("/epoxy/") ||
+					req.url.startsWith("/baremux/") ||
+					req.url.startsWith("/uv/") ||
+					req.url.endsWith("/sw.js") ||
+					req.url.endsWith("/register-sw.js") ||
+					req.url.endsWith("/index.js") ||
+					req.url.endsWith("/uv-app.config.js")
+				) {
+					res.setHeader("Cache-Control", "no-store");
+				}
 				handler(req, res);
 			})
 			.on("upgrade", (req, socket, head) => {

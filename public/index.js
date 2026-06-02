@@ -27,6 +27,10 @@ const homeButton = document.getElementById("home-button");
 const detachButton = document.getElementById("detach-button");
 const quickLinks = document.querySelectorAll("[data-url]");
 
+const appVersion = "2026-05-23.2";
+const baremuxWorker = `/baremux/worker.js?v=${appVersion}`;
+const epoxyTransport = `/epoxy/index.mjs?v=${appVersion}`;
+
 const { ScramjetController } = $scramjetLoadController();
 
 const scramjet = new ScramjetController({
@@ -37,9 +41,9 @@ const scramjet = new ScramjetController({
 	},
 });
 
-scramjet.init();
+const scramjetReady = scramjet.init();
 
-const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+const connection = new BareMux.BareMuxConnection(baremuxWorker);
 
 let activeFrame = null;
 let activeUrl = "";
@@ -111,8 +115,8 @@ async function navigateTo(url) {
 	browserAddress.value = url;
 
 	try {
-		await ensureTransport();
 		await ensureServiceWorker();
+		await ensureTransport();
 		openBrowserShell();
 		const frame = ensureFrame(getRuntimeEngine());
 		frame.go(url);
@@ -130,6 +134,8 @@ async function navigateTo(url) {
 async function ensureServiceWorker() {
 	workerStatus.textContent = "Registering";
 	await registerSW();
+	await scramjetReady;
+	await scramjet.modifyConfig({});
 	workerStatus.textContent = "Ready";
 }
 
@@ -139,8 +145,8 @@ async function ensureTransport() {
 	}/wisp/`;
 
 	transportStatus.textContent = "Connecting";
-	if ((await connection.getTransport()) !== "/epoxy/index.mjs") {
-		await connection.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
+	if ((await connection.getTransport()) !== epoxyTransport) {
+		await connection.setTransport(epoxyTransport, [{ wisp: wispUrl }]);
 	}
 	transportStatus.textContent = getTransportLabel();
 }
