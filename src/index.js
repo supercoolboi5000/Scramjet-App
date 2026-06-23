@@ -109,7 +109,10 @@ let port = parseInt(process.env.PORT || "");
 
 if (isNaN(port)) port = 8080;
 
+const host =
+	process.env.HOST || (process.env.RAILWAY_ENVIRONMENT_NAME ? "::" : "0.0.0.0");
+
 fastify.listen({
 	port: port,
-	host: "0.0.0.0",
+	host,
 });

@@ -26,8 +26,9 @@ const reloadButton = document.getElementById("reload-button");
 const homeButton = document.getElementById("home-button");
 const detachButton = document.getElementById("detach-button");
 const quickLinks = document.querySelectorAll("[data-url]");
+const spaceCanvas = document.getElementById("space-canvas");
 
-const appVersion = "2026-05-23.2";
+const appVersion = "2026-06-23.1";
 const baremuxWorker = `/baremux/worker.js?v=${appVersion}`;
 const epoxyTransport = `/epoxy/index.mjs?v=${appVersion}`;
 
@@ -94,6 +95,7 @@ detachButton.addEventListener("click", () => {
 });
 
 address.focus();
+initSpaceCanvas();
 
 async function navigateFromInput(value) {
 	const cleanValue = value.trim();
@@ -122,7 +124,7 @@ async function navigateTo(url) {
 		frame.go(url);
 		setStatus("Loading", "busy");
 	} catch (err) {
-		showError("Invisi Proxy could not open that address.", err);
+		showError("VoidGate could not open that address.", err);
 		setStatus("Connection failed", "error");
 		hideFrameLoader();
 		openLaunchPanel();
@@ -167,7 +169,7 @@ function ensureFrame(engine) {
 function createScramjetFrame() {
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
-	frame.frame.title = "Invisi Proxy Scramjet browser";
+	frame.frame.title = "VoidGate Scramjet browser";
 	frame.frame.addEventListener("load", handleFrameLoad);
 
 	return {
@@ -179,7 +181,7 @@ function createScramjetFrame() {
 function createUltravioletFrame() {
 	const frame = document.createElement("iframe");
 	frame.id = "sj-frame";
-	frame.title = "Invisi Proxy Ultraviolet browser";
+	frame.title = "VoidGate Ultraviolet browser";
 	frame.addEventListener("load", handleFrameLoad);
 
 	return {
@@ -290,4 +292,88 @@ function clearError() {
 	errorPanel.hidden = true;
 	error.textContent = "";
 	errorCode.textContent = "";
+}
+
+function initSpaceCanvas() {
+	if (!spaceCanvas) return;
+
+	const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+	const context = spaceCanvas.getContext("2d");
+	let width = 0;
+	let height = 0;
+	let stars = [];
+	let animationFrame = 0;
+
+	function resize() {
+		const scale = Math.min(window.devicePixelRatio || 1, 2);
+		width = window.innerWidth;
+		height = window.innerHeight;
+		spaceCanvas.width = Math.floor(width * scale);
+		spaceCanvas.height = Math.floor(height * scale);
+		spaceCanvas.style.width = `${width}px`;
+		spaceCanvas.style.height = `${height}px`;
+		context.setTransform(scale, 0, 0, scale, 0, 0);
+		stars = createStars(Math.min(190, Math.floor((width * height) / 5800)));
+		draw(0);
+	}
+
+	function createStars(count) {
+		return Array.from({ length: count }, () => ({
+			x: Math.random() * width,
+			y: Math.random() * height,
+			radius: 0.5 + Math.random() * 2.7,
+			speed: 0.18 + Math.random() * 1.35,
+			alpha: 0.24 + Math.random() * 0.72,
+			drift: -0.18 + Math.random() * 0.36,
+		}));
+	}
+
+	function draw() {
+		context.clearRect(0, 0, width, height);
+		const gradient = context.createRadialGradient(
+			width * 0.5,
+			height * 0.42,
+			0,
+			width * 0.5,
+			height * 0.42,
+			Math.max(width, height) * 0.74
+		);
+		gradient.addColorStop(0, "rgba(24, 38, 62, 0.42)");
+		gradient.addColorStop(0.42, "rgba(5, 9, 16, 0.7)");
+		gradient.addColorStop(1, "rgba(0, 0, 0, 1)");
+		context.fillStyle = gradient;
+		context.fillRect(0, 0, width, height);
+
+		for (const star of stars) {
+			context.beginPath();
+			context.fillStyle = `rgba(255,255,255,${star.alpha})`;
+			context.shadowBlur = star.radius * 6;
+			context.shadowColor = "rgba(255,255,255,0.7)";
+			context.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+			context.fill();
+			context.shadowBlur = 0;
+
+			if (!reducedMotion.matches) {
+				star.y += star.speed;
+				star.x += star.drift;
+				if (star.y - star.radius > height) {
+					star.y = -star.radius;
+					star.x = Math.random() * width;
+				}
+				if (star.x < -8) star.x = width + 8;
+				if (star.x > width + 8) star.x = -8;
+			}
+		}
+
+		if (!reducedMotion.matches) animationFrame = requestAnimationFrame(draw);
+	}
+
+	function restart() {
+		cancelAnimationFrame(animationFrame);
+		resize();
+	}
+
+	window.addEventListener("resize", restart);
+	reducedMotion.addEventListener("change", restart);
+	restart();
 }

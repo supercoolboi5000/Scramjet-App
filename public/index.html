@@ -8,9 +8,9 @@
 		/>
 		<meta
 			name="description"
-			content="Invisi Proxy, a polished Scramjet-powered web proxy."
+			content="VoidGate, a polished Scramjet-powered web proxy."
 		/>
-		<title>Invisi Proxy</title>
+		<title>VoidGate</title>
 
 		<link rel="shortcut icon" href="favicon.ico" />
 		<script src="/scram/scramjet.all.js?v=2026-05-23.2"></script>
@@ -25,20 +25,24 @@
 	</head>
 
 	<body>
-		<main class="app-shell" aria-label="Invisi Proxy">
+		<canvas id="space-canvas" class="space-canvas" aria-hidden="true"></canvas>
+		<div class="galaxy-layer" aria-hidden="true"></div>
+
+		<main class="app-shell" aria-label="VoidGate">
 			<section class="launch-panel" id="launch-panel" aria-label="Proxy launch">
 				<header class="brand-bar">
-					<a class="brand" href="/" aria-label="Invisi Proxy home">
+					<a class="brand" href="/" aria-label="VoidGate home">
 						<span class="brand-mark" aria-hidden="true">
-							<img src="sj.png" alt="" />
+							<span class="brand-core"></span>
 						</span>
 						<span>
-							<strong>Invisi Proxy</strong>
-							<small>Scramjet powered</small>
+							<strong>VoidGate</strong>
+							<small>Scramjet / UV</small>
 						</span>
 					</a>
 
 					<nav class="utility-links" aria-label="Resources">
+						<a href="#games">Games</a>
 						<a href="credits.html">Credits</a>
 						<a href="https://github.com/MercuryWorkshop/scramjet">Scramjet</a>
 					</nav>
@@ -46,8 +50,8 @@
 
 				<div class="launch-layout">
 					<section class="search-stage" aria-labelledby="search-title">
-						<p class="eyebrow">Private browsing workspace</p>
-						<h1 id="search-title">Invisi Proxy</h1>
+						<p class="eyebrow">Dark matter gateway</p>
+						<h1 id="search-title">VoidGate</h1>
 
 						<form id="sj-form" class="omnibox-card">
 							<input
@@ -59,6 +63,7 @@
 								Search or enter a URL
 							</label>
 							<div class="omnibox">
+								<span class="orbital-ring" aria-hidden="true"></span>
 								<svg
 									viewBox="0 0 24 24"
 									aria-hidden="true"
@@ -77,7 +82,7 @@
 									type="text"
 									autocomplete="off"
 									spellcheck="false"
-									placeholder="Search or enter a URL"
+									placeholder="Drop a URL or search the void"
 								/>
 								<button id="sj-launch" class="launch-button" type="submit">
 									Go
@@ -100,6 +105,63 @@
 							</button>
 						</div>
 
+						<section class="games-section" id="games" aria-label="Games">
+							<div class="section-heading">
+								<p class="eyebrow">Launch bay</p>
+								<h2>Games</h2>
+							</div>
+							<div class="game-grid">
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://poki.com"
+								>
+									<strong>Poki</strong>
+									<span>Arcade</span>
+								</button>
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://www.crazygames.com"
+								>
+									<strong>CrazyGames</strong>
+									<span>Instant play</span>
+								</button>
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://www.coolmathgames.com"
+								>
+									<strong>Coolmath</strong>
+									<span>Puzzle</span>
+								</button>
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://itch.io/games/html5"
+								>
+									<strong>Itch HTML5</strong>
+									<span>Indie</span>
+								</button>
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://neal.fun"
+								>
+									<strong>Neal.fun</strong>
+									<span>Experiments</span>
+								</button>
+								<button
+									class="game-tile"
+									type="button"
+									data-url="https://play2048.co"
+								>
+									<strong>2048</strong>
+									<span>Classic</span>
+								</button>
+							</div>
+						</section>
+
 						<section
 							class="status-panel"
 							id="status-panel"
@@ -121,6 +183,10 @@
 					</section>
 
 					<aside class="system-panel" aria-label="Connection details">
+						<div class="signal-card">
+							<span>Signal</span>
+							<strong>Stable</strong>
+						</div>
 						<div>
 							<span>Transport</span>
 							<strong id="transport-status">Epoxy over Wisp</strong>
